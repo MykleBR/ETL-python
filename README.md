@@ -1,3 +1,8 @@
+Esse script faz os seguintes passos utilizando o comando no terminal:
+
+    python processar_dados.py
+  
+
 1 - Descompactar o dados.zip para obter origem-dados.csv e tipos.csv.
 
 2 - Ler os dois arquivos CSV e remover possíveis inconsistências de formatação.
