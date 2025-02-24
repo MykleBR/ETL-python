@@ -58,14 +58,29 @@ else:
     sql_file = "insert-dados.sql"
     table_name = "dados_finais"
     columns = list(df_critico.columns)
-
-    def gerar_insert(row):
-        values = ', '.join([f"'{str(value)}'" if isinstance(value, str) else str(value) for value in row])
-        return f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({values});"
+    batch_size = 50
+    values_list = []
 
     with open(sql_file, "w", encoding="utf-8") as f:
-        for _, row in df_critico.iterrows():
-            f.write(gerar_insert(row) + "\n")
+        for i, (_, row) in enumerate(df_critico.iterrows(), start=1):
+            formatted_values = [
+                f"'{value}'" if isinstance(value, str) else str(value)
+                for value in row
+            ]
+            
+            row_string = "(" + ", ".join(formatted_values) + ")"
+            values_list.append(row_string)
+            
+            # linhas em grupos de 50
+            if i % batch_size == 0:
+                insert_statement = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES\n" + ",\n".join(values_list) + ";\n"
+                f.write(insert_statement)
+                values_list = []
+
+        # valores restantes
+        if values_list:
+            insert_statement = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES\n" + ",\n".join(values_list) + ";\n"
+            f.write(insert_statement)
 
     # Query SQL para agrupar por dia e tipo
     query_agrupada = f"""
